@@ -1,0 +1,25 @@
+{
+  "name": "qamba-hw9-1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "report": "npx allure-commandline serve",
+    "test": "npx playwright test",
+    "testUI": "npx playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.9.3",
+    "eslint": "^8.50.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.28.1"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^8.1.0",
+    "allure-playwright": "^2.9.2"
+  }
+}
