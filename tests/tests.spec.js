@@ -1,93 +1,114 @@
-import { test, expect } from '@playwright/test';                    //Импорт плейрайта
-import {faker} from '@faker-js/faker';                              //Импорт фейкера для генерации данных
-import { UserBuilder } from '../src/shared/helpers/user.helper';    //Импорт вспомогательного билдера пользователя
+import { test, expect } from '@playwright/test';                        //Импорт плейрайта
+import {faker} from '@faker-js/faker';                                  //Импорт фейкера для генерации данных
+import { UserBuilder } from '../src/shared/helpers/user.helper';        //Импорт вспомогательного билдера пользователя
+import { allure } from 'allure-playwright';                             //Импорт аллюра
+import { MainPage, RegisterPage, LoginPage, AuthorizedPage, CartPage } from '../src/pages/index'; //Импорт методов регистрации/авторизации
 
-//let firstname, lastname, email, password; //Использовалось фейкером
+//let firstname, lastname, email, password; //Использовалось фейкером на первых порах
 
-//Не смог заставить работать тесты, если использовать создание объекта в beforeEach / beforeAll
-const newUser = new UserBuilder().setName().setSurname().setEmail().setPassword()
-        .build();
+//Создаем объекты пользователя и страниц для использования в тестах
+let newUser
+let mainPage
+let registerPage
+let loginPage
+let authorizedPage
+let cartPage
 
 //Открытие тестируемого сайта перед каждым запуском
 test.beforeEach(async ({ page }) => {
     //Выводим название выполняемых кейсов в консоль
     console.log('Running ${testInfo.title}');
-    //Создаем объект Пользователь
-    /*
-    const newUser = new UserBuilder().setName().setSurname().setEmail().setPassword()
-        .build();
-        */
     //Открываем при каждом запуске теста страницу сайта
-    await page.goto('https://demowebshop.tricentis.com/');
+    await allure.step('Открываем сайт', async () => {
+        await page.goto('https://demowebshop.tricentis.com/');
+        });
+    //Присваиваем объекту Пользователь данные из фейкера для использовани в тестах
+    newUser = new UserBuilder().setName().setSurname().setEmail().setPassword()
+        .build();
+    //Добавляем PageObject
+    mainPage = new MainPage(page);
+    registerPage = new RegisterPage(page);
+    loginPage = new LoginPage(page);
+    authorizedPage = new AuthorizedPage(page);
+    cartPage = new CartPage(page);
   });
 
 //Тесты
 //Тест 1
-test.describe('Регистрация', () => {
+test.describe('Регистрация пользователя', () => {
     test('Регистрация муж', async ({ page }) => {
+        //console.log(newUser); //использовал для проверки того, что в тест подтягивается объет пользователя
+        //allure
+        await allure.epic('Регистрация');
+
         //Шаги
-        await page.getByRole('link', { name: 'Register' }).click();
+        //Открываем регистрацию
+        await mainPage.register();
+        //todo Добавить возможность выбора иного пола через рандомайзер
+        await allure.step('Выбираем мужской пол', async () => {
         await page.getByLabel('Male', { exact: true }).check();
-        await page.getByLabel('First name:').fill(newUser.firstname);
-        await page.getByLabel('Last name:').fill(newUser.lastname);
-        await page.getByLabel('Email:').fill(newUser.email);
-        await page.getByLabel('Password:', { exact: true }).fill(newUser.password);
-        await page.getByLabel('Confirm password:').fill(newUser.password);
-        await page.getByRole('button', { name: 'Register' }).click();
-        //Ожидаемый результат
-        await expect(page.getByText('Your registration completed')).toBeVisible();
-        await expect(page.getByRole('link', { name: newUser.email })).toBeVisible();
-    
+        });
+        //Регистируемся
+        await registerPage.registerMale(newUser.firstname, newUser.lastname, newUser.email, newUser.password, newUser.password);
+        //Ожидаемый результат регистрации
+        await registerPage.checkRegister(newUser.email);
     });
 });
 
 //Тест 2
-test.describe('Авторизация', () => {
+test.describe('Авторизация пользователя', () => {
     test('Авторизация существующего пользователя', async ({ page }) => {
+        //allure
+        await allure.epic('Авторизация');
         //Шаги
-        await page.getByRole('link', { name: 'Log in' }).click();
-        await page.getByLabel('Email:').fill('lastomemento@c.com');
-        await page.getByLabel('Password:').fill('qwerty');
-        await page.getByRole('button', { name: 'Log in' }).click();
-        //Ожидаемый результат
-        await expect(page.getByRole('link', { name: 'lastomemento@c.com' })).toBeVisible();
-    });
+        //Открываем авторизацию
+        await mainPage.login();
+        //Авторизуемся
+        await loginPage.login();
+        //Ожидаемый результат авторизации
+        await loginPage.checkLogin();
+        });
 });
 
 //Тест 3
 test.describe('Разлогин', () => {
     test('Разлогин авторизованного пользователя', async ({ page }) => {
+        //allure
+        await allure.epic('Разлогин');
         //Шаги
-        await page.getByRole('link', { name: 'Log in' }).click();
-        await page.getByLabel('Email:').fill('lastomemento@c.com');
-        await page.getByLabel('Password:').fill('qwerty');
-        await page.getByRole('button', { name: 'Log in' }).click();
-        await page.getByRole('link', { name: 'lastomemento@c.com' }).click();
-        await page.getByRole('link', { name: 'Log out' }).click();
+        //Открываем авторизацию
+        await mainPage.login();
+        //Авторизуемся
+        await loginPage.login();
+        //Разлогиниваемся
+        await authorizedPage.logout();
         //Ожидаемый результат
-        await expect(page.getByRole('link', { name: 'Log in' })).toBeVisible();
+        await authorizedPage.checkLogout();
         });
 });
 
 //Тест 4
-test.describe('Новостные письма', () => {
+test.describe('Рассылки', () => {
     test('Подписка на рассылку через email', async ({ page }) => {
+        //allure
+        await allure.epic('Рассылки');
         //Шаги
-        await page.locator('#newsletter-email').fill(newUser.email);
-        await page.getByRole('button', { name: 'Subscribe' }).click();
-        //Ожидаемый результат
-        await expect(page.getByText('Thank you for signing up! A')).toBeVisible();
+        //Подписываемся на рассылку
+        await mainPage.newsletterSubscribe(newUser.email);
+        //Проверяем, что вывелось сообщение об успешной подписке
+        await mainPage.checkNewsletterSubscribe();
     });
 });
 
 //Тест 5
 test.describe('Корзина', () => {
     test('Добавление товара в корзину', async ({ page }) => {
+        //allure
+        await allure.epic('Корзина');
         //Шаги
-        await page.locator('div:nth-child(3) > .product-item > .details > .add-info > .buttons > .button-2').click();
-        await page.reload({ waitUntil: 'domcontentloaded' });
-        await page.goto('https://demowebshop.tricentis.com/cart');
+        //Добавляем товар в корзину
+        await mainPage.addToCart();
         //Ожидаемый результат
-        await expect(page.getByRole('img', { name: 'Picture of 14.1-inch Laptop' })).toBeVisible();
+        await cartPage.checkAddedToCart();
     });
 });

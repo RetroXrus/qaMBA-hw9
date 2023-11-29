@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 
+//Функция конструктор - где прячем создание тестовых данных/объектов
 const GetNewUser = function GetNewUser(firstname, lastname, email, password) {
     this.firstname = firstname;
     this.lastname = lastname;

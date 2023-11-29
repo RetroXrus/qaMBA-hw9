@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "report": "npx allure-commandline serve",
+    "report": "npx allure-commandline serve -h localhost",
     "test": "npx playwright test",
     "testUI": "npx playwright test"
   },
