@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';                              //Импорт плейрайта
+import { expect } from '@playwright/test';
 import { allure } from 'allure-playwright';                             //Импорт аллюра
 
 class MainPage {
@@ -9,7 +9,6 @@ class MainPage {
     this.loginLink = page.getByRole('link', { name: 'Log in' });
     this.newsLetter = page.locator('#newsletter-email');
     this.subscribeButton = page.getByRole('button', { name: 'Subscribe' });
-    this.subscribeSuccess = page.getByText('Thank you for signing up! A');
     this.productN2 = page.locator('div:nth-child(3) > .product-item > .details > .add-info > .buttons > .button-2');
 
     }
@@ -22,7 +21,7 @@ class MainPage {
         });
     }
     //Авторизация
-    async login()
+    async gotoLogin()
     {
         await allure.step('Нажимаем кнопку Log in', async () => {
             await this.loginLink.click();
@@ -33,27 +32,17 @@ class MainPage {
     {
         await allure.step('Вводим почту', async () => {
             await this.newsLetter.fill(email);
-            //await page.locator('#newsletter-email').fill(newUser.email);
         });
             await allure.step('Нажимаем кнопку Subscribe', async () => {
             await this.subscribeButton.click();
-            //await page.getByRole('button', { name: 'Subscribe' }).click();
         });
     }
-    //Ожидаемый результат
-    async checkNewsletterSubscribe()
-    {
-        await allure.step('Присутствует надпись Thank you for signing up! A', async () => {
-            await expect(this.subscribeSuccess).toBeVisible();
-        });
-    }
-    
+
     //Добавление в корзину и переход в нее
     async addToCart()
     {
          await allure.step('Нажимаем кнопку Add to cart', async () => {
             await this.productN2.click();
-            //await page.locator('div:nth-child(3) > .product-item > .details > .add-info > .buttons > .button-2').click();
             await this.page.reload({ waitUntil: 'domcontentloaded' });
         });
             await allure.step('Открываем корзину', async () => {

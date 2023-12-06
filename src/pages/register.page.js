@@ -11,7 +11,6 @@ class RegisterPage {
     this.passwordField = page.getByLabel('Password:', { exact: true });
     this.confirmPasswordField = page.getByLabel('Confirm password:');
     this.registerButton = page.getByRole('button', { name: 'Register' });
-    this.successRegMessage = page.getByText('Your registration completed');
     //todo придумать как заиспользовать тут почту для checkRegister(), что приходит нам из созданного объекта
     //this.emailLink = page.getByRole('link', { name: email });
     }
@@ -34,16 +33,6 @@ class RegisterPage {
             });
         await allure.step('Нажимаем кнопку Register', async () => {
             await this.registerButton.click();
-            });
-    }
-
-    async checkRegister(email='') {
-        await allure.step('Присутствует надпись Your registration completed', async () => {
-            await expect(this.successRegMessage).toBeVisible();
-            });
-        await allure.step('Присутствует кнопка Email', async () => {
-            //await expect(this.emailLink).toBeVisible();
-            await expect(this.page.getByRole('link', { name: email })).toBeVisible();
             });
     }
 }
