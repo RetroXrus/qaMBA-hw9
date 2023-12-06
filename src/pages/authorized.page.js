@@ -8,7 +8,7 @@ class AuthorizedPage {
     this.logoutLink = page.getByRole('link', { name: 'Log out' });
     }
 
-    //Добровольный разлогин из авторизованной зоны
+    //Разлогин из авторизованной зоны
     async logout() {
         await allure.step('Нажимаем кнопку Log out', async () => {
             await this.logoutLink.click();
